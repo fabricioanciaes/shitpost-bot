@@ -6,7 +6,8 @@ const config = require("./config.json")
 var bot = new Discord.Client()
 let isReady = true
 let messageData = []
-const cooldown = 1 * 60000
+let minutes = config.defaultCooldown
+const cooldown = minutes * 60000
 
 function sendMarkov(messageData) {
     const markov = new Markov(messageData)
@@ -32,13 +33,13 @@ bot.on('ready', () => {
             setInterval(autoMessage, cooldown)
         })
         .catch(console.error)
-
-
 })
 
 bot.on('message', async message => {
     const args = message.content.slice(config.prefix.length).trim().split(/ +/g)
     const command = args.shift().toLowerCase()
+
+    const modRole = message.guild.roles.find("name", "MOD")
 
     if(message.author.bot) return
     
@@ -57,6 +58,23 @@ bot.on('message', async message => {
     if (command === "markov") {
         console.log("Command Triggered")
         message.channel.send(sendMarkov(messageData))
+    }
+
+    if(command === "changecd") {
+        if (!modRole) {
+            return console.log("não existe role de mod aqui não pasero")
+        }
+        if (!message.member.roles.has(modRole.id)) {
+            return message.reply("Esse comando é só pra carraixco, saí daí minha vítima");
+        } else {
+            if (!isNaN(args[0])) {
+                minutes = parseInt(args[0]);
+                message.channel.send(`Cooldown agora é de ${minutes} minuto(s)`)
+                console.log(`Cooldown changed to ${minutes} minutes`)
+            } else {
+                message.channel.send("Essa porra não é número não pasero")
+            }
+        }
     }
 
 })
