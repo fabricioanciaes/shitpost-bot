@@ -1,12 +1,12 @@
-var Discord = require('discord.js');
+const Discord = require('discord.js');
 const Markov = require('markov-strings');
-const asyncInterval = require('asyncinterval');
+const fs = require('fs');
+
+var config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 
 var bot = new Discord.Client();
 let isReady = true;
 let messageData = [];
-const maxSize = 2000;
-const chatGeral = '203151370029760512';
 const cooldown = 1 * 60000;
 
 function sendMarkov(messageData) {
@@ -18,13 +18,13 @@ function sendMarkov(messageData) {
 
 function autoMessage(){
     console.log("sending auto message")
-    bot.channels.get(chatGeral).send(sendMarkov(messageData))
+    bot.channels.get(config.defaultChannel).send(sendMarkov(messageData))
 }
 
 bot.on('ready', () => {
     console.log("READY!")
     bot.user.setGame("No máximo Gold");
-    var channel = bot.channels.get(chatGeral)
+    var channel = bot.channels.get(config.defaultChannel)
 
     channel.fetchMessages({ limit: 100 })
         .then(message => {
@@ -43,7 +43,7 @@ bot.on('message', message => {
         messageData.push(temp);
         console.log('\x1Bc')
         console.log('message log size:' + messageData.length)
-        if(messageData.length > maxSize) {
+        if(messageData.length > config.logMaxSize) {
             messageData.shift();
             console.log('\x1Bc')
             console.log("max size reached: " + messageData);
@@ -57,9 +57,4 @@ bot.on('message', message => {
 
 });
 
-
-
-    
-
-
-bot.login('MzQ0Njg5NTExNjM0MTczOTY0.DGwY7A.CWhzXezDPCP7ZTsgQH_9pTelQgY');
+bot.login(config.token);
