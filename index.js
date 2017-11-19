@@ -2,7 +2,8 @@ const Discord = require('discord.js');
 const Markov = require('markov-strings');
 const fs = require('fs');
 
-var config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
+//var config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
+const {token, defaultChannel, logMaxSize, prefix} = require("./config.json");
 
 var bot = new Discord.Client();
 let isReady = true;
@@ -18,13 +19,13 @@ function sendMarkov(messageData) {
 
 function autoMessage(){
     console.log("sending auto message")
-    bot.channels.get(config.defaultChannel).send(sendMarkov(messageData))
+    bot.channels.get(defaultChannel).send(sendMarkov(messageData))
 }
 
 bot.on('ready', () => {
     console.log("READY!")
     bot.user.setGame("No máximo Gold");
-    var channel = bot.channels.get(config.defaultChannel)
+    var channel = bot.channels.get(defaultChannel)
 
     channel.fetchMessages({ limit: 100 })
         .then(message => {
@@ -38,12 +39,14 @@ bot.on('ready', () => {
 });
 
 bot.on('message', message => {
-    if (message.author.bot === false && message.content.charAt(0) != "!") {
+    //?if (message.author.bot) return;
+
+    if (message.author.bot === false && message.content.charAt(0) != prefix) {
         var temp = message.content.replace(/ *\<[^)]*\> */g, " ").trim()
         messageData.push(temp);
         console.log('\x1Bc')
         console.log('message log size:' + messageData.length)
-        if(messageData.length > config.logMaxSize) {
+        if(messageData.length > logMaxSize) {
             messageData.shift();
             console.log('\x1Bc')
             console.log("max size reached: " + messageData);
@@ -57,4 +60,4 @@ bot.on('message', message => {
 
 });
 
-bot.login(config.token);
+bot.login(token);
