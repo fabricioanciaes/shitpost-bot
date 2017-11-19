@@ -1,0 +1,16 @@
+{
+  "name": "mecha-lofi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "asyncinterval": "0.0.7",
+    "discord.js": "^11.2.1",
+    "markov-strings": "^1.3.5"
+  }
+}
