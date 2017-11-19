@@ -1,19 +1,18 @@
-const Discord = require('discord.js');
-const Markov = require('markov-strings');
-const fs = require('fs');
+const Discord = require('discord.js')
+const Markov = require('markov-strings')
+const fs = require('fs')
+const config = require("./config.json")
 
-var config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
-
-var bot = new Discord.Client();
-let isReady = true;
-let messageData = [];
-const cooldown = 1 * 60000;
+var bot = new Discord.Client()
+let isReady = true
+let messageData = []
+const cooldown = 1 * 60000
 
 function sendMarkov(messageData) {
-    const markov = new Markov(messageData);
-    markov.buildCorpusSync();
-    const result = markov.generateSentenceSync();
-    return result.string;
+    const markov = new Markov(messageData)
+    markov.buildCorpusSync()
+    const result = markov.generateSentenceSync()
+    return result.string
 }
 
 function autoMessage(){
@@ -23,7 +22,7 @@ function autoMessage(){
 
 bot.on('ready', () => {
     console.log("READY!")
-    bot.user.setGame("No máximo Gold");
+    bot.user.setGame("No máximo Gold")
     var channel = bot.channels.get(config.defaultChannel)
 
     channel.fetchMessages({ limit: 100 })
@@ -32,29 +31,34 @@ bot.on('ready', () => {
             messageData = message.map(message => message.content)
             setInterval(autoMessage, cooldown)
         })
-        .catch(console.error);
+        .catch(console.error)
 
 
-});
+})
 
-bot.on('message', message => {
-    if (message.author.bot === false && message.content.charAt(0) != "!") {
+bot.on('message', async message => {
+    const args = message.content.slice(config.prefix.length).trim().split(/ +/g)
+    const command = args.shift().toLowerCase()
+
+    if(message.author.bot) return
+    
+    if (message.content.charAt(0) != config.prefix) {
         var temp = message.content.replace(/ *\<[^)]*\> */g, " ").trim()
-        messageData.push(temp);
+        messageData.push(temp)
         console.log('\x1Bc')
         console.log('message log size:' + messageData.length)
         if(messageData.length > config.logMaxSize) {
-            messageData.shift();
+            messageData.shift()
             console.log('\x1Bc')
-            console.log("max size reached: " + messageData);
+            console.log("max size reached: " + messageData)
         }
     }
 
-    if (message.content === "!markov") {
+    if (command === "markov") {
         console.log("Command Triggered")
-        message.channel.send(sendMarkov(messageData));
+        message.channel.send(sendMarkov(messageData))
     }
 
-});
+})
 
-bot.login(config.token);
+bot.login(config.token)
