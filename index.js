@@ -1,13 +1,14 @@
 const Discord = require('discord.js')
 const Markov = require('markov-strings')
 const fs = require('fs')
-const config = require("./config.json")
 
-var bot = new Discord.Client()
-let isReady = true
-let messageData = []
-let minutes = config.defaultCooldown
-const cooldown = minutes * 60000
+const {token, defaultChannel, logMaxSize, prefix, defaultCooldown} = require("./config.json");
+
+var bot = new Discord.Client();
+let isReady = true;
+let messageData = [];
+let minutes = defaultCooldown;
+let cooldown = minutes * 60000;
 
 function sendMarkov(messageData) {
     const markov = new Markov(messageData)
@@ -18,13 +19,15 @@ function sendMarkov(messageData) {
 
 function autoMessage(){
     console.log("sending auto message")
-    bot.channels.get(config.defaultChannel).send(sendMarkov(messageData))
+    bot.channels.get(defaultChannel).send(sendMarkov(messageData))
 }
+
+console.log(defaultChannel)
 
 bot.on('ready', () => {
     console.log("READY!")
     bot.user.setGame("No máximo Gold")
-    var channel = bot.channels.get(config.defaultChannel)
+    var channel = bot.channels.get(defaultChannel)
 
     channel.fetchMessages({ limit: 100 })
         .then(message => {
@@ -36,20 +39,20 @@ bot.on('ready', () => {
 })
 
 bot.on('message', async message => {
-    const args = message.content.slice(config.prefix.length).trim().split(/ +/g)
+    const args = message.content.slice(prefix.length).trim().split(/ +/g)
     const command = args.shift().toLowerCase()
 
     const modRole = message.guild.roles.find("name", "MOD")
 
-    if(message.author.bot) return
-    
-    if (message.content.charAt(0) != config.prefix) {
+    if (message.author.bot) return;
+
+    if (message.content.charAt(0) != prefix) {
         var temp = message.content.replace(/ *\<[^)]*\> */g, " ").trim()
         messageData.push(temp)
         console.log('\x1Bc')
         console.log('message log size:' + messageData.length)
-        if(messageData.length > config.logMaxSize) {
-            messageData.shift()
+        if(messageData.length > logMaxSize) {
+            messageData.shift();
             console.log('\x1Bc')
             console.log("max size reached: " + messageData)
         }
@@ -79,4 +82,4 @@ bot.on('message', async message => {
 
 })
 
-bot.login(config.token)
+bot.login(token)
